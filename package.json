@@ -3,15 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently -k \"npm:dev:server\" \"npm:dev:next\"",
+    "dev:server": "tsx server/index.ts",
+    "dev:next": "next dev",
+    "build:client:webpack": "webpack --config webpack.client.config.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@hapi/boom": "10.0.1",
+    "@hapi/hapi": "21.3.12",
     "@supabase/supabase-js": "2.57.4",
+    "graphql": "16.10.0",
     "mapbox-gl": "3.15.0",
+    "mobx": "6.13.7",
+    "mobx-react-lite": "4.1.0",
     "next": "15.3.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
@@ -24,7 +32,12 @@
     "@types/react-dom": "19.0.4",
     "eslint": "9.26.0",
     "eslint-config-next": "15.3.0",
-    "typescript": "5.8.3"
+    "concurrently": "9.2.1",
+    "ts-loader": "9.5.2",
+    "tsx": "4.20.4",
+    "typescript": "5.8.3",
+    "webpack": "5.101.3",
+    "webpack-cli": "6.0.1"
   },
   "engines": {
     "node": "22.x"

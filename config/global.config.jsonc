@@ -1,0 +1,72 @@
+{
+  // Global application toggles
+  "appName": "SmartTrip",
+  "environment": "development",
+  "features": {
+    "enableNextFrontend": true,
+    "enableHapiServer": true,
+    "enableGraphQL": true,
+    "enableSwagger": true,
+    "enableMobxStore": true,
+    "useCookieBasedActiveTrip": true
+  },
+
+  // Hapi server runtime configuration
+  "server": {
+    "host": "127.0.0.1",
+    "port": 4000,
+    "apiPrefix": "/api",
+    "corsOrigins": ["*"]
+  },
+
+  // Auth and context settings
+  "auth": {
+    "jwtCookieName": "smarttrip_jwt",
+    "activeTripCookieName": "smarttrip_active_trip_id",
+    "jwtHeaderName": "authorization"
+  },
+
+  // Per-endpoint access requirements
+  // none: public
+  // user: require x-user-id (for MVP auth)
+  // user+activeTrip: require x-user-id and active trip in cookie/header
+  "endpointSecurity": {
+    "openapi.get": "none",
+    "health.connections": "none",
+
+    "trips.list": "user",
+    "trips.create": "user",
+    "trips.selectActive": "user",
+    "trips.getActive": "user+activeTrip",
+    "trips.updateActive": "user+activeTrip",
+    "trips.deleteActive": "user+activeTrip",
+
+    "stops.listForActiveTrip": "user+activeTrip",
+    "stops.createForActiveTrip": "user+activeTrip",
+    "stops.updateForActiveTrip": "user+activeTrip",
+    "stops.deleteForActiveTrip": "user+activeTrip",
+    "stops.reorderForActiveTrip": "user+activeTrip",
+
+    "route.computeForActiveTrip": "user+activeTrip"
+  },
+
+  // Downstream APIs and services
+  "downstream": {
+    "supabase": {
+      "baseUrlEnvKey": "NEXT_PUBLIC_SUPABASE_URL"
+    },
+    "mapbox": {
+      "directionsBaseUrl": "https://api.mapbox.com/directions/v5/mapbox/walking",
+      "geocodingBaseUrl": "https://api.mapbox.com/geocoding/v5/mapbox.places"
+    }
+  },
+
+  // Webpack client bundling settings
+  "webpack": {
+    "client": {
+      "entry": "./client/index.tsx",
+      "outputDir": "./dist",
+      "outputFile": "client.bundle.js"
+    }
+  }
+}
