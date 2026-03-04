@@ -16,12 +16,23 @@ export type Env = z.infer<typeof baseEnvSchema>;
 let cachedEnv: Env | null = null;
 let cachedMapboxToken: string | null = null;
 
+const formatZodError = (error: z.ZodError) => {
+  return error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; ");
+};
+
 export function getEnv(): Env {
   if (cachedEnv) {
     return cachedEnv;
   }
 
-  cachedEnv = baseEnvSchema.parse(process.env);
+  try {
+    cachedEnv = baseEnvSchema.parse(process.env);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new Error(`Environment validation failed for base env: ${formatZodError(error)}`);
+    }
+    throw error;
+  }
   return cachedEnv;
 }
 
@@ -29,6 +40,13 @@ export function getMapboxAccessToken(): string {
   if (cachedMapboxToken) {
     return cachedMapboxToken;
   }
-  cachedMapboxToken = mapboxEnvSchema.parse(process.env).MAPBOX_ACCESS_TOKEN;
+  try {
+    cachedMapboxToken = mapboxEnvSchema.parse(process.env).MAPBOX_ACCESS_TOKEN;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new Error(`Environment validation failed for mapbox env: ${formatZodError(error)}`);
+    }
+    throw error;
+  }
   return cachedMapboxToken;
 }

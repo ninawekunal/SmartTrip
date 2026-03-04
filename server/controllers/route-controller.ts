@@ -1,26 +1,11 @@
 import Boom from "@hapi/boom";
 import { Request } from "@hapi/hapi";
 import { hashOrderedStops } from "@/lib/stops/hash";
+import { requireActiveTripId, requireUserId } from "@/server/utils/request-context";
 import * as mapboxDs from "@/server/data-sources/mapbox-data-source";
 import * as supabaseDs from "@/server/data-sources/supabase-data-source";
 
-function requireUserId(request: Request): string {
-  const userId = request.app.context?.userId;
-  if (!userId) {
-    throw Boom.unauthorized("Missing x-user-id header.");
-  }
-  return userId;
-}
-
-function requireActiveTripId(request: Request): string {
-  const tripId = request.app.context?.activeTripId;
-  if (!tripId) {
-    throw Boom.badRequest("Missing active trip id in cookie or x-active-trip-id header.");
-  }
-  return tripId;
-}
-
-export async function computeRouteForActiveTrip(request: Request) {
+export const computeRouteForActiveTrip = async (request: Request) => {
   const userId = requireUserId(request);
   const tripId = requireActiveTripId(request);
   await supabaseDs.getTripByIdAndUser(tripId, userId);
@@ -67,4 +52,4 @@ export async function computeRouteForActiveTrip(request: Request) {
     cached: false,
     googleMapsUrl
   };
-}
+};

@@ -1,5 +1,5 @@
 import { openApiDocument } from "@/lib/api/openapi";
 
-export async function getOpenApiDocument() {
+export const getOpenApiDocument = async () => {
   return openApiDocument;
-}
+};

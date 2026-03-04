@@ -1,4 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
+import { fetchWrapper } from "@/client/utils/use-fetch-wrapper";
+import { ENDPOINT_NAMES } from "@/shared/constants/endpoint-names";
 
 type Trip = {
   id: string;
@@ -20,20 +22,22 @@ class TripStore {
   async loadTrips(userId: string) {
     this.loading = true;
     try {
-      const response = await fetch("/api/trips", {
-        method: "GET",
-        headers: {
-          "x-user-id": userId
-        }
-      });
-
-      const payload = (await response.json()) as { trips?: Trip[]; error?: string };
+      const response = await fetchWrapper<{ trips: Trip[] }>(
+        "/api/trips",
+        {
+          method: "GET",
+          headers: {
+            "x-user-id": userId
+          }
+        },
+        { fallbackEndpointName: ENDPOINT_NAMES.TRIPS_LIST }
+      );
       if (!response.ok) {
-        throw new Error(payload.error ?? "Failed to load trips.");
+        throw new Error(response.error.message);
       }
 
       runInAction(() => {
-        this.trips = payload.trips ?? [];
+        this.trips = response.data.trips ?? [];
       });
     } finally {
       runInAction(() => {
@@ -46,22 +50,24 @@ class TripStore {
     this.submitting = true;
 
     try {
-      const response = await fetch("/api/trips", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "x-user-id": userId
+      const response = await fetchWrapper<{ trip: Trip }>(
+        "/api/trips",
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-user-id": userId
+          },
+          body: JSON.stringify(input)
         },
-        body: JSON.stringify(input)
-      });
-
-      const payload = (await response.json()) as { trip?: Trip; error?: string };
-      if (!response.ok || !payload.trip) {
-        throw new Error(payload.error ?? "Failed to create trip.");
+        { fallbackEndpointName: ENDPOINT_NAMES.TRIPS_CREATE }
+      );
+      if (!response.ok || !response.data.trip) {
+        throw new Error(response.ok ? "Failed to create trip." : response.error.message);
       }
 
       runInAction(() => {
-        this.trips = [payload.trip!, ...this.trips];
+        this.trips = [response.data.trip, ...this.trips];
       });
     } finally {
       runInAction(() => {

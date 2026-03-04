@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { fetchWrapper } from "@/client/utils/use-fetch-wrapper";
+import { ENDPOINT_NAMES } from "@/shared/constants/endpoint-names";
 
 type ServiceStatus = {
   connected: boolean;
@@ -22,12 +24,18 @@ export function ConnectionStatus() {
 
     async function run() {
       try {
-        const response = await fetch("/api/health/connections", { cache: "no-store" });
-        const json = (await response.json()) as ConnectionsResponse;
+        const response = await fetchWrapper<ConnectionsResponse>(
+          "/api/health/connections",
+          { cache: "no-store" },
+          { fallbackEndpointName: ENDPOINT_NAMES.HEALTH_CONNECTIONS }
+        );
+        if (!response.ok) {
+          throw new Error(response.error.message);
+        }
         if (cancelled) {
           return;
         }
-        setData(json);
+        setData(response.data);
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to check connections.";
         if (!cancelled) {

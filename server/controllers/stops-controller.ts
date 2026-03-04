@@ -1,38 +1,23 @@
 import Boom from "@hapi/boom";
 import { Request } from "@hapi/hapi";
 import { createStopSchema, reorderStopsSchema, updateStopSchema } from "@/lib/api/schemas";
+import { requireActiveTripId, requireUserId } from "@/server/utils/request-context";
 import * as supabaseDs from "@/server/data-sources/supabase-data-source";
 
-function requireUserId(request: Request): string {
-  const userId = request.app.context?.userId;
-  if (!userId) {
-    throw Boom.unauthorized("Missing x-user-id header.");
-  }
-  return userId;
-}
-
-function requireActiveTripId(request: Request): string {
-  const tripId = request.app.context?.activeTripId;
-  if (!tripId) {
-    throw Boom.badRequest("Missing active trip id in cookie or x-active-trip-id header.");
-  }
-  return tripId;
-}
-
-async function assertActiveTripOwned(request: Request) {
+const assertActiveTripOwned = async (request: Request) => {
   const userId = requireUserId(request);
   const tripId = requireActiveTripId(request);
   await supabaseDs.getTripByIdAndUser(tripId, userId);
   return tripId;
-}
+};
 
-export async function listStopsForActiveTrip(request: Request) {
+export const listStopsForActiveTrip = async (request: Request) => {
   const tripId = await assertActiveTripOwned(request);
   const stops = await supabaseDs.listStopsByTrip(tripId);
   return { stops };
-}
+};
 
-export async function createStopForActiveTrip(request: Request) {
+export const createStopForActiveTrip = async (request: Request) => {
   const tripId = await assertActiveTripOwned(request);
   const payload = createStopSchema.parse(request.payload ?? {});
 
@@ -46,9 +31,9 @@ export async function createStopForActiveTrip(request: Request) {
   });
 
   return { stop };
-}
+};
 
-export async function updateStopForActiveTrip(request: Request) {
+export const updateStopForActiveTrip = async (request: Request) => {
   const tripId = await assertActiveTripOwned(request);
   const payload = request.payload as { stopId?: string; name?: string; notes?: string | null };
   if (!payload?.stopId) {
@@ -65,9 +50,9 @@ export async function updateStopForActiveTrip(request: Request) {
   });
 
   return { stop };
-}
+};
 
-export async function deleteStopForActiveTrip(request: Request) {
+export const deleteStopForActiveTrip = async (request: Request) => {
   const tripId = await assertActiveTripOwned(request);
   const payload = request.payload as { stopId?: string };
   if (!payload?.stopId) {
@@ -76,9 +61,9 @@ export async function deleteStopForActiveTrip(request: Request) {
 
   await supabaseDs.deleteStopByTrip({ tripId, stopId: payload.stopId });
   return { deleted: true };
-}
+};
 
-export async function reorderStopsForActiveTrip(request: Request) {
+export const reorderStopsForActiveTrip = async (request: Request) => {
   const tripId = await assertActiveTripOwned(request);
   const payload = reorderStopsSchema.parse(request.payload ?? {});
 
@@ -88,4 +73,4 @@ export async function reorderStopsForActiveTrip(request: Request) {
   } catch (error) {
     throw Boom.badRequest(error instanceof Error ? error.message : "Failed to reorder stops.");
   }
-}
+};

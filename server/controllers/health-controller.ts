@@ -1,14 +1,18 @@
+import { getEnv } from "@/lib/env";
+import { RequestWithContext } from "@/shared/types/request-with-context";
 import * as mapboxDs from "@/server/data-sources/mapbox-data-source";
 import * as supabaseDs from "@/server/data-sources/supabase-data-source";
+import { getRequestContext } from "@/server/utils/request-context";
 
-export async function connectionsHealth(request: { app: { context?: { userId: string | null } } }) {
-  const userId = request.app.context?.userId ?? "00000000-0000-0000-0000-000000000000";
+export const connectionsHealth = async (request: RequestWithContext) => {
+  const userId = getRequestContext(request).userId ?? "00000000-0000-0000-0000-000000000000";
   const status = {
     supabase: { connected: true, message: "Connected" },
     mapbox: { connected: true, message: "Connected" }
   };
 
   try {
+    getEnv();
     await supabaseDs.listTripsByUser(userId);
   } catch (error) {
     status.supabase = {
@@ -27,4 +31,4 @@ export async function connectionsHealth(request: { app: { context?: { userId: st
   }
 
   return status;
-}
+};
