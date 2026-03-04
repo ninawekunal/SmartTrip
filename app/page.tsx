@@ -1,3 +1,5 @@
+import { ConnectionStatus } from "@/app/components/connection-status";
+
 export default function HomePage() {
   return (
     <main className="container">
@@ -9,6 +11,7 @@ export default function HomePage() {
         <li>Compute walking route distance/time</li>
         <li>Export ordered route to Google Maps</li>
       </ul>
+      <ConnectionStatus />
     </main>
   );
 }

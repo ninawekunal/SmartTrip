@@ -38,6 +38,9 @@ Out of scope for MVP:
    - `npm run dev`
 6. Open API docs:
    - `http://localhost:3000/swagger`
+7. Check integration health:
+   - `http://localhost:3000/api/health/connections`
+   - or see the connection panel on the home page (`/`)
 
 ## Environment Variables
 

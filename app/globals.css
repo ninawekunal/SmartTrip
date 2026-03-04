@@ -33,3 +33,39 @@ ul {
   padding-left: 1.4rem;
   line-height: 1.7;
 }
+
+.status-card {
+  margin-top: 2rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #f7faff;
+  border: 1px solid #d5e5ff;
+}
+
+.status-card h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+}
+
+.status-good {
+  color: #166534;
+  font-weight: 600;
+  margin: 0.35rem 0;
+}
+
+.status-bad {
+  color: #b91c1c;
+  font-weight: 600;
+  margin: 0.35rem 0;
+}
+
+.status-loading {
+  margin: 0;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.status-message {
+  margin: 0 0 0.6rem;
+  color: #334155;
+}
